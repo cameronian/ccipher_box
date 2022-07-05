@@ -1,0 +1,91 @@
+GIT
+  remote: binenc
+  revision: 632483d860fbd853915276043b42354ebd2d9aea
+  branch: master
+  specs:
+    binenc (0.1.0)
+      teLogger
+      toolrack
+
+GIT
+  remote: binenc-ruby
+  revision: 1c7ae0ec51c41d7258014f72dafbb9d8f5d90b89
+  branch: master
+  specs:
+    binenc-ruby (0.1.0)
+      teLogger
+      toolrack
+
+GIT
+  remote: ccipher_factory
+  revision: a7a6d8f59204ca028c60f02c1989c1020cae2ae6
+  branch: master
+  specs:
+    ccipher_factory (0.1.0)
+      tlogger
+
+GIT
+  remote: ccrypto
+  revision: 00f0b61a565e75d297c42dc20e01aac167df2a1a
+  branch: main
+  specs:
+    ccrypto (0.1.0)
+      teLogger
+      toolrack
+
+GIT
+  remote: ccrypto-ruby
+  revision: ddd3d62aef5d51c698f295486d4f69d686cf7d48
+  branch: main
+  specs:
+    ccrypto-ruby (0.1.0)
+      teLogger
+      toolrack
+
+PATH
+  remote: .
+  specs:
+    ccipher_box (0.1.0)
+      teLogger
+      toolrack
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    base58 (0.2.3)
+    diff-lcs (1.5.0)
+    rake (13.0.6)
+    rspec (3.11.0)
+      rspec-core (~> 3.11.0)
+      rspec-expectations (~> 3.11.0)
+      rspec-mocks (~> 3.11.0)
+    rspec-core (3.11.0)
+      rspec-support (~> 3.11.0)
+    rspec-expectations (3.11.0)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.11.0)
+    rspec-mocks (3.11.1)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.11.0)
+    rspec-support (3.11.0)
+    teLogger (0.1.0)
+    tlogger (0.26.3)
+    toolrack (0.18.6)
+      base58
+      tlogger
+
+PLATFORMS
+  x86_64-linux
+
+DEPENDENCIES
+  binenc!
+  binenc-ruby!
+  ccipher_box!
+  ccipher_factory!
+  ccrypto!
+  ccrypto-ruby!
+  rake (~> 13.0)
+  rspec (~> 3.0)
+
+BUNDLED WITH
+   2.2.28
