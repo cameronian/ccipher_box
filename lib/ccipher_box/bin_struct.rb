@@ -12,8 +12,6 @@ module CcipherBox
     end
 
     def struct_from_bin(bin)
-      #bs = Binenc::EngineFactory.instance(:bin_struct)
-      #type, ver = bs.value_from_bin_struct(bin, 0, 1)
       type, ver = struct_fields_from_bin(bin, 0, 1)
       c = CBTag.value_constant(type) 
       st = struct(c, translate_version(ver))

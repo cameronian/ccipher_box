@@ -51,10 +51,13 @@ module CcipherBox
         # from key type, size, KDF config changes all will affect
         # final result
         #@baseMat = val.encoded
-      when String
-        @baseMat = val
+      #when String
+      # test for String will means need a mechanism to test for Java::byte[]
+      # which is not yet there
+      #  @baseMat = val
       else
-        raise KeyboxException, "Unsupported base material type '#{val}'"
+        @baseMat = val
+        #raise KeyboxException, "Unsupported base material type '#{val}'"
       end
 
       @dkeyVal = nil

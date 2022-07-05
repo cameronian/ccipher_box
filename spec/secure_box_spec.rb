@@ -2,6 +2,10 @@
 
 RSpec.describe CcipherBox::SecureBox do
 
+  before {
+    @comp = Ccrypto::UtilFactory.instance(:comparator)
+  }
+
   it 'generates simple engine and protect with securebox' do
     
     data = SecureRandom.random_bytes(2000)
@@ -44,7 +48,7 @@ RSpec.describe CcipherBox::SecureBox do
     dec.update(out.bytes)
     dec.final
 
-    expect(dout.bytes == data).to be true
+    expect(@comp.is_equals?(dout.bytes, data)).to be true
 
     expect{
       rsb2 = CcipherBox::SecureBox.load_storage(sbout) do |ops|

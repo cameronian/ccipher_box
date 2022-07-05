@@ -2,6 +2,10 @@
 
 RSpec.describe CcipherBox::SecureRing do
 
+  before {
+    @comp = Ccrypto::UtilFactory.instance(:comparator)
+  }
+
   it 'initialize new ring, persist and load back from storage' do
   
     ring = CcipherBox::SecureRing.new
@@ -13,7 +17,6 @@ RSpec.describe CcipherBox::SecureRing do
     bin = ring.encoded
     expect(bin.nil?).to be false
     expect(bin.length == 0).to be false
-    p bin
 
     rring = CcipherBox::SecureRing.from_encoded(bin)
     expect(rring.is_key_registered?("opsKey1")).to be true
@@ -53,7 +56,7 @@ RSpec.describe CcipherBox::SecureRing do
     dec.update(out.bytes)
     dec.final
 
-    expect(dout.bytes == data).to be true
+    expect(@comp.is_equals?(dout.bytes, data)).to be true
 
     reng.dispose_key("opsKey1")
     expect(reng.is_key_registered?("opsKey1")).to be false

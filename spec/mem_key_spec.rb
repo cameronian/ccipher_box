@@ -3,6 +3,10 @@ require_relative '../lib/ccipher_box/mem_key'
 
 RSpec.describe CcipherBox::MemKey do
 
+  before {
+    @comp = Ccrypto::UtilFactory.instance(:comparator)
+  }
+
   it 'perform data enc and dec on given key' do
   
     sk = SecureRandom.random_bytes(16)
@@ -13,7 +17,7 @@ RSpec.describe CcipherBox::MemKey do
 
     mk2 = CcipherBox::MemKey.new(sk)
     plain = mk2.decrypt(enc)
-    expect(plain == "testing 123").to be true
+    expect(@comp.is_equals?(plain, "testing 123")).to be true
 
   end
 
@@ -28,7 +32,7 @@ RSpec.describe CcipherBox::MemKey do
 
     mk2 = CcipherBox::MemKey.new(sk)
     plain = mk2.decrypt(enc)
-    expect(plain == data).to be true
+    expect(@comp.is_equals?(plain, data)).to be true
 
   end
 
@@ -48,7 +52,7 @@ RSpec.describe CcipherBox::MemKey do
 
     mk2 = CcipherBox::MemKey.new(sk)
     plain = mk2.decrypt(enc)
-    expect(plain == data).to be true
+    expect(@comp.is_equals?(plain, data)).to be true
 
   end
 
@@ -66,7 +70,7 @@ RSpec.describe CcipherBox::MemKey do
       puts "mk keyID : #{mk.keyID}"
       puts "mk2 keyID : #{mk2.keyID}"
     end
-    expect(mk2.keyID == mk.keyID).to be true
+    expect(@comp.is_equals?(mk2.keyID, mk.keyID)).to be true
 
   end
 

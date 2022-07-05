@@ -192,13 +192,22 @@ module CcipherBox
       
       indx = startIndx
       
+      #case key
+      #when CcipherFactory::SoftSymKey
+      #  logger.debug "Given key to seal is Soft SymKey"
+      #  payload = key.key.key
+      #when CcipherFactory::DerivedSymKey
+      #  logger.debug "Given key to seal is Derived SymKey"
+      #  payload = key.key
+      #else
+      #  logger.debug "Given key to seal is native key"
+      #  payload = key
+      #end
+     
       case key
-      when CcipherFactory::SoftSymKey
-        logger.debug "Given key to seal is Soft SymKey"
-        payload = key.key.key
-      when CcipherFactory::DerivedSymKey
-        logger.debug "Given key to seal is Derived SymKey"
-        payload = key.key
+      when CcipherFactory::SymKey
+        logger.debug "Given key to seal is SymKey #{key.class}"
+        payload = key.raw_key
       else
         logger.debug "Given key to seal is native key"
         payload = key
@@ -308,6 +317,7 @@ module CcipherBox
 
         end
       rescue Binenc::BinencDecodingError => ex
+      rescue Binenc::BinencEngineException => ex
         #STDERR.puts ex.message
       end
 
