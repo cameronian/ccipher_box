@@ -89,8 +89,8 @@ module CcipherBox
             bin :layer
           end,
 
-          cipher_envp: Binenc::EngineFactory.instance(:bin_struct).define do
-            oid :oid, CBTag.constant_value(:cipher_envp)
+          ccipherbox_keywrap: Binenc::EngineFactory.instance(:bin_struct).define do
+            oid :oid, CBTag.constant_value(:ccipherbox_keywrap)
             int :version, 0x0100
             bin :keyid
             bin :keyConfig

@@ -16,6 +16,12 @@ module CcipherBox
   class KeyNotRegistered < StandardError; end
 
   class InsufficientData < StandardError; end
+
+
+  class SecureBoxError < StandardError; end
+  class SecureBoxDecryptionError < StandardError; end
+  class SecureRingNotExist < StandardError; end
+
   # Your code goes here...
 
 

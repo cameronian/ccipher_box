@@ -11,7 +11,6 @@ if not defined?(CBTag)
       define_constant(:mem_key_layer, "#.10")
       define_constant(:mem_key_envp, "#.11")
 
-      define_constant(:cipher_envp, "#.20")
 
       define_constant(:keybox, "#.30") 
 
@@ -23,7 +22,8 @@ if not defined?(CBTag)
         define_constant(:keyConfig_from_base, "#.2") 
 
         define_constant(:ccipherbox_cipher, "#.10") 
-        define_constant(:ccipherboxes, "#.20") 
+        define_constant(:ccipherbox_keywrap, "#.20")
+        #define_constant(:ccipherboxes, "#.20") 
       end
 
       define_constant(:securebox, "#.90") 

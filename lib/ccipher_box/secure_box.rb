@@ -1,7 +1,8 @@
 
 
 module CcipherBox
-  
+ 
+
   # 
   # SecureBox is a secure container protected by user password
   # which has multiple SecureRings (crypto configurations)
@@ -12,17 +13,82 @@ module CcipherBox
     attr_accessor :rings
 
     def initialize(rings = nil)
-      @rings = rings || []
+      @rings = {  }
       @keyConfigs = []
+      if not_empty?(rings)
+        rings.each do |r|
+          @rings[r.name] = r
+        end
+      end
     end
 
+    ##
+    # SecureRing management
+    #
+    # Allow external created ring
     def add_ring(ring)
-      @rings << ring
+      @rings[ring.name] = ring
     end
 
     def rings
       @rings.freeze
     end
+
+    # Implicit SecureRing management
+    def encryption_session(ringName, keyName, opts = {  })
+      ring = find_ring(ringName, opts) 
+      ring.generate_key(keyName, opts) if not ring.is_key_registered?(keyName)
+      ring.new_encryption_engine(keyName)
+    end
+
+    def decryption_session(ringName)
+      ring = find_ring(ringName, { auto_create_ring: false }) 
+      ring.new_decryption_engine
+    end
+
+    def decrypt(bin, &block)
+
+      raise CcipherBox::Error, "No SecureRing is laoded" if is_empty?(@rings)
+
+      intBuf = false
+      if block
+        output = block.call(:output) 
+      end
+
+      if output.nil?
+        intBuf = true
+        output = MemBuf.new
+      end
+    
+      res = nil
+      lastEx = nil
+      @rings.values.each do |v|
+        begin
+          dec = v.new_decryption_engine
+          dec.init(output)
+          dec.update(bin)
+          dec.final
+
+          res = output.bytes.clone
+          output.dispose
+
+          break
+        rescue KeyNotRegistered => ex
+          lastEx = ex
+        end
+      end
+
+      if intBuf
+        raise KeyNotRegistered, "Decryption failed. #{lastEx.nil? ? "" : "(#{lastEx.message})"}" if res.nil?
+        res
+      else
+        nil
+      end
+
+    end
+
+    ## end SecureRing management
+    
 
     def to_storage(&block)
       
@@ -46,7 +112,7 @@ module CcipherBox
       end
 
       ringBin = []
-      @rings.each do |e|
+      @rings.values.each do |e|
         ringBin << e.encoded
       end
 
@@ -99,22 +165,48 @@ module CcipherBox
         end
       end
 
-      dec = CcipherFactory::SymKeyCipher.att_decryptor
-      intOut = MemBuf.new
-      dec.output(intOut)
-      dec.key = sk
-      dec.att_decrypt_init
-      dec.att_decrypt_update(st.engines)
-      dec.att_decrypt_final
+      begin
+        
+        dec = CcipherFactory::SymKeyCipher.att_decryptor
+        intOut = MemBuf.new
+        dec.output(intOut)
+        dec.key = sk
+        dec.att_decrypt_init
+        dec.att_decrypt_update(st.engines)
+        dec.att_decrypt_final
 
-      cboxes = BinStruct.instance.struct_from_bin(intOut.bytes)
-      rings = []
-      cboxes.secure_rings.each do |cb|
-        rings << CcipherBox::SecureRing.from_encoded(cb)
+        cboxes = BinStruct.instance.struct_from_bin(intOut.bytes)
+        rings = []
+        cboxes.secure_rings.each do |cb|
+          rings << CcipherBox::SecureRing.from_encoded(cb)
+        end
+
+        SecureBox.new(rings)
+
+      rescue CcipherFactory::SymKeyDecryptionError => ex
+        raise SecureBoxDecryptionError, ex
       end
 
-      SecureBox.new(rings)
+    end
 
+    private
+    def find_ring(ringName, opts = {  })
+      
+      raise SecureBoxError, "Ring name cannot be empty" if is_empty?(ringName)
+
+      if not @rings.keys.include?(ringName) 
+        autoCreate = opts[:auto_create_ring]
+        autoCreate = true if is_empty?(autoCreate)
+        if autoCreate
+          ring = SecureRing.new({ name: ringName })
+          @rings[ringName] = ring
+        else
+          raise SecureRingNotExist, "Ring '#{ringName}' does not exist and auto create is not active."
+        end
+      end
+
+      @rings[ringName]
+      
     end
 
   end

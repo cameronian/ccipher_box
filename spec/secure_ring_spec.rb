@@ -67,7 +67,7 @@ RSpec.describe CcipherBox::SecureRing do
       dec2.init(dout2)
       dec2.update(out.bytes)
       dec2.final
-    }.to raise_exception(CcipherBox::MemVault::MemVaultException)
+    }.to raise_exception(CcipherBox::KeyNotRegistered)
 
   end
 

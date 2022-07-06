@@ -15,9 +15,10 @@ module CcipherBox
 
     attr_accessor :name
     def initialize(opts = {  })
-      @vault = MemVault.new
 
-      @name = opts[:name]
+      @name = opts[:name] || "Genesis"
+
+      @vault = MemVault.new(@name)
 
       # seed for data encryption key derivation
       @encSeed = opts[:encSeed] || SecureRandom.random_bytes(64)
@@ -57,6 +58,10 @@ module CcipherBox
       @vault.is_registered?(name)
     end
 
+    def registered_keys
+      @vault.keys.freeze
+    end
+
     def new_encryption_engine(name)
       raise KeyNotRegistered, "Key with name '#{name}' not registered" if not is_key_registered?(name)
       EncryptionEngine.new(@vault, name) 
@@ -68,7 +73,7 @@ module CcipherBox
 
     def encoded
       st = BinStruct.instance.struct(:secure_ring)
-      st.name = @name || SecureRandom.uuid
+      st.name = @name
       st.cipherSeed = @encSeed
       st.keyConfigs = @encKeyConfig.encoded
       st.encoded

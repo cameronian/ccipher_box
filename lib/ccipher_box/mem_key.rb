@@ -11,11 +11,12 @@ module CcipherBox
 
     class MemKeyException < Exception; end
 
-    attr_accessor :name
+    attr_accessor :name, :ring
 
-    def initialize(key, name = nil)
+    def initialize(ring, key, name = nil)
       @dataConv = Ccrypto::UtilFactory.instance(:data_conversion)
       @dataComp = Ccrypto::UtilFactory.instance(:comparator)
+      self.ring = ring
       self.key = key
       self.name = name
 
@@ -93,7 +94,7 @@ module CcipherBox
       encOut = membuf.bytes.clone
       membuf.dispose
       
-      st = BinStruct.instance.struct(:cipher_envp)
+      st = BinStruct.instance.struct(:ccipherbox_keywrap)
       st.keyid = @dataConv.from_hex(self.keyID)
       sk.attach_mode
       st.keyConfig = sk.encoded
@@ -116,7 +117,7 @@ module CcipherBox
       st = BinStruct.instance.struct_from_bin(bin)
       st.keyid = @dataConv.to_hex(st.keyid)
 
-      raise MemKeyException, "Given data to decrypt is not cipher envelope" if CBTag.value_constant(st.oid) != :cipher_envp
+      raise MemKeyException, "Given data to decrypt is not cipher envelope" if CBTag.value_constant(st.oid) != :ccipherbox_keywrap
       raise MemKeyException, "Give cipher envelope is not meant for this key. Current key ID '#{self.keyID}' and key ID inside envelope '#{st.keyid}'" if not @dataComp.is_equals?(self.keyID, st.keyid)
 
       case @key
@@ -172,11 +173,11 @@ module CcipherBox
     #  kb
     #end
 
-    def encoded
-      st = BinStruct.instance.struct(:mem_key)
-      st.value = mem_unseal(@key)
-      st.encoded
-    end
+    #def encoded
+    #  st = BinStruct.instance.struct(:mem_key)
+    #  st.value = mem_unseal(@key)
+    #  st.encoded
+    #end
 
     private
     # Encrypt the actual key resides in memory

@@ -5,17 +5,18 @@ RSpec.describe CcipherBox::MemKey do
 
   before {
     @comp = Ccrypto::UtilFactory.instance(:comparator)
+    @defRing = "Genesis"
   }
 
   it 'perform data enc and dec on given key' do
   
     sk = SecureRandom.random_bytes(16)
 
-    mk = CcipherBox::MemKey.new(sk)
+    mk = CcipherBox::MemKey.new(@defRing, sk)
     enc = mk.encrypt("testing 123")
     expect(enc).not_to be nil
 
-    mk2 = CcipherBox::MemKey.new(sk)
+    mk2 = CcipherBox::MemKey.new(@defRing, sk)
     plain = mk2.decrypt(enc)
     expect(@comp.is_equals?(plain, "testing 123")).to be true
 
@@ -26,11 +27,11 @@ RSpec.describe CcipherBox::MemKey do
     sk = CcipherFactory::SymKeyGenerator.generate(:aes, 256)
 
     data = SecureRandom.random_bytes(128)
-    mk = CcipherBox::MemKey.new(sk)
+    mk = CcipherBox::MemKey.new(@defRing, sk)
     enc = mk.encrypt(data)
     expect(enc).not_to be nil
 
-    mk2 = CcipherBox::MemKey.new(sk)
+    mk2 = CcipherBox::MemKey.new(@defRing, sk)
     plain = mk2.decrypt(enc)
     expect(@comp.is_equals?(plain, data)).to be true
 
@@ -46,11 +47,11 @@ RSpec.describe CcipherBox::MemKey do
     end
 
     data = SecureRandom.random_bytes(128)
-    mk = CcipherBox::MemKey.new(sk)
+    mk = CcipherBox::MemKey.new(@defRing, sk)
     enc = mk.encrypt(data)
     expect(enc).not_to be nil
 
-    mk2 = CcipherBox::MemKey.new(sk)
+    mk2 = CcipherBox::MemKey.new(@defRing, sk)
     plain = mk2.decrypt(enc)
     expect(@comp.is_equals?(plain, data)).to be true
 
@@ -61,11 +62,11 @@ RSpec.describe CcipherBox::MemKey do
     sk = SecureRandom.random_bytes(16)
 
     puts "SK 1 : #{sk.inspect}"
-    mk = CcipherBox::MemKey.new(sk)
+    mk = CcipherBox::MemKey.new(@defRing, sk)
     expect(mk.keyID).not_to be nil
 
     puts "SK 2 : #{sk.inspect}"
-    mk2 = CcipherBox::MemKey.new(sk)
+    mk2 = CcipherBox::MemKey.new(@defRing, sk)
     if mk2.keyID != mk.keyID
       puts "mk keyID : #{mk.keyID}"
       puts "mk2 keyID : #{mk2.keyID}"

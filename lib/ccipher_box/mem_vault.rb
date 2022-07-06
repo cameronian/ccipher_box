@@ -15,9 +15,13 @@ module CcipherBox
 
     class MemVaultException < Exception; end
 
+    def initialize(ring)
+      @ring = ring
+    end
+
     def register(name, key)
       @dataConv = Ccrypto::UtilFactory.instance(:data_conversion)
-      vault[name] = MemKey.new(key, name)
+      vault[name] = MemKey.new(@ring, key, name)
       self
     end
 
@@ -51,18 +55,13 @@ module CcipherBox
         logger.debug "Found decryption key with label #{vault.invert[foundKey]}"
         foundKey.decrypt(cipher)
       else
-        raise MemVaultException, "Encryption key for this cipher not registered (KeyID : #{keyID})"
+        raise KeyNotRegistered, "Encryption key for this cipher not registered (KeyID : #{keyID})"
       end
 
     end
 
     def derive(name)
       vault[name].derive
-    end
-
-    def encoded
-      st = BinStruct.instance.struct(:mem_vault)
-
     end
 
     private
