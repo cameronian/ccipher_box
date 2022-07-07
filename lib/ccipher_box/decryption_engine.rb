@@ -53,7 +53,10 @@ module CcipherBox
             rescue KeyNotRegistered
               # retry with next key
             end
+
           end
+
+          raise KeyNotRegistered, "Cannot find any loaded key decrypt this data" if @dec.nil?
 
         end
 
@@ -64,7 +67,7 @@ module CcipherBox
     end
 
     def final
-      @dec.decrypt_final 
+      @dec.decrypt_final if not @dec.nil? 
     end
 
   end
