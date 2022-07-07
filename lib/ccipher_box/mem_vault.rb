@@ -64,6 +64,10 @@ module CcipherBox
       vault[name].derive
     end
 
+    def get_key(name)
+      vault[name]
+    end
+
     private
     # internal structure to bind the application given name
     # to a key.

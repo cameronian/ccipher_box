@@ -64,7 +64,7 @@ module CcipherBox
 
     def new_encryption_engine(name)
       raise KeyNotRegistered, "Key with name '#{name}' not registered" if not is_key_registered?(name)
-      EncryptionEngine.new(@vault, name) 
+      EncryptionEngine.new(@vault.get_key(name)) 
     end
 
     def new_decryption_engine

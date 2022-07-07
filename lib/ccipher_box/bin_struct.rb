@@ -133,7 +133,7 @@ module CcipherBox
             oid :oid, CBTag.constant_value(:ccipherbox_cipher)
             int :version, 0x0100
             bin :keyConfig
-            bin :baseMaterial
+            seq :baseMaterial
             bin :cipherConfig
           end,
 

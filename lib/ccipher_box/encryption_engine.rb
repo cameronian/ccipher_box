@@ -2,12 +2,14 @@
 require 'tempfile'
 
 module CcipherBox
+  # 
+  # Meant to encrypt large data
+  #
   class EncryptionEngine
     include TR::CondUtils
    
-    def initialize(vault, keyID)
-      @vault = vault
-      @keyID = keyID
+    def initialize(*args)
+      @keys = args
     end
 
     def init(output)
@@ -39,7 +41,13 @@ module CcipherBox
 
       st = BinStruct.instance.struct(:ccipherbox_cipher)
       st.keyConfig = @sk.encoded
-      st.baseMaterial = @vault.encrypt(@keyID, @baseMat, &block)
+     
+      encBaseMat = []
+      @keys.each do |k|
+        encBaseMat << k.encrypt(@baseMat)
+      end
+      st.baseMaterial = encBaseMat
+      
       st.cipherConfig = header
       aheader = st.encoded
 

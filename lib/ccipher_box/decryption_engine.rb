@@ -26,23 +26,28 @@ module CcipherBox
 
           st = BinStruct.instance.struct_from_bin(meta)
 
-          baseMat = @vault.decrypt(st.baseMaterial)
+          st.baseMaterial.each do |ebm|
 
-          sk = CcipherFactory::SymKey.from_encoded(st.keyConfig) do |ops|
-            case ops
-            when :password
-              baseMat
+            baseMat = @vault.decrypt(ebm)
+
+            sk = CcipherFactory::SymKey.from_encoded(st.keyConfig) do |ops|
+              case ops
+              when :password
+                baseMat
+              end
             end
+
+            @dec = CcipherFactory::SymKeyCipher.decryptor
+            @dec.output(@output)
+            @dec.key = sk
+            @dec.decrypt_init
+
+            @dec.decrypt_update_meta(st.cipherConfig)
+
+            @dec.decrypt_update_cipher(data) if not_empty?(data)
+
+            break
           end
-
-          @dec = CcipherFactory::SymKeyCipher.decryptor
-          @dec.output(@output)
-          @dec.key = sk
-          @dec.decrypt_init
-
-          @dec.decrypt_update_meta(st.cipherConfig)
-
-          @dec.decrypt_update_cipher(data) if not_empty?(data)
 
         end
 
