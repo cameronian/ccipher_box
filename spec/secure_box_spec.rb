@@ -65,12 +65,17 @@ RSpec.describe CcipherBox::SecureBox do
     
     data = SecureRandom.random_bytes(2000)
 
-    enc = subject.encryption_session("FirstRing", "opsKey1", { algo: :aes, keysize: 256 })
+    enc = subject.encryption_session("FirstRing/opsKey1", { algo: :aes, keysize: 256 })
+
+    enc = subject.encryption_session("FirstRing/opsKey2", { algo: :aes, keysize: 256 })
     out = MemBuf.new
     enc.init(out)
     enc.update(data)
     enc.final
 
+    # 
+    # Persist the SecureBox
+    #
     sbout = subject.to_storage do |ops|
       case ops
       when :password
@@ -78,6 +83,9 @@ RSpec.describe CcipherBox::SecureBox do
       end
     end
 
+    # 
+    # load from storage
+    #
     rsb = subject.class.load_storage(sbout) do |ops|
       case ops
       when :password
