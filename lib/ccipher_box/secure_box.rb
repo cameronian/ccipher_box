@@ -30,22 +30,72 @@ module CcipherBox
       @rings[ring.name] = ring
     end
 
+    def remove_ring(ring_name)
+      @rings.delete(ring_name)
+    end
+
     def rings
       @rings.freeze
     end
 
     # Implicit SecureRing management
-    def encryption_session(ringName, keyName, opts = {  })
-      ring = find_ring(ringName, opts) 
-      ring.generate_key(keyName, opts) if not ring.is_key_registered?(keyName)
-      ring.new_encryption_engine(keyName)
+    #
+    # Encryption in chunk
+    #
+    def encryption_session(*specs, opts)
+
+      keys = []
+      specs.each do |spec|
+        ss = split_encryption_spec(spec)
+        ringName = ss[0]
+        keyName = ss[1]
+        ring = find_ring(ringName, opts) 
+        ring.generate_key(keyName, opts) if not ring.is_key_registered?(keyName)
+        keys << ring.get_key(keyName)
+      end
+
+      EncryptionEngine.new(*keys)
     end
 
+    # 
+    # Decryption in chunk
+    #
     def decryption_session(ringName)
       ring = find_ring(ringName, { auto_create_ring: false }) 
       ring.new_decryption_engine
     end
 
+    # 
+    # Single line encryption
+    #
+    def encrypt(*specs, data)
+
+      keys = []
+      specs.each do |spec|
+        ss = split_encryption_spec(spec)
+        ringName = ss[0]
+        keyName = ss[1]
+        ring = find_ring(ringName, opts) 
+        ring.generate_key(keyName, opts) if not ring.is_key_registered?(keyName)
+        keys << ring.get_key(keyName)
+      end
+
+      eng = ring.new_encryption_engine(*keys)
+      intBuf = MemBuf.new
+      eng.init(intBuf)
+      eng.update(data)
+      eng.final
+
+      res = intBuf.bytes.clone
+      intBuf.dispose
+
+      res
+      
+    end
+
+    # 
+    # Single line decryption
+    #
     def decrypt(bin, &block)
 
       raise CcipherBox::Error, "No SecureRing is laoded" if is_empty?(@rings)
@@ -207,6 +257,12 @@ module CcipherBox
 
       @rings[ringName]
       
+    end
+
+    def split_encryption_spec(spec)
+      ss = spec.split("/")
+      raise SecureBoxEncryptionSpecError, "Spec requires to in format ring_name/key_name format" if ss.length != 2
+      ss
     end
 
   end
