@@ -28,25 +28,31 @@ module CcipherBox
 
           st.baseMaterial.each do |ebm|
 
-            baseMat = @vault.decrypt(ebm)
+            begin
+              
+              baseMat = @vault.decrypt(ebm)
 
-            sk = CcipherFactory::SymKey.from_encoded(st.keyConfig) do |ops|
-              case ops
-              when :password
-                baseMat
+              sk = CcipherFactory::SymKey.from_encoded(st.keyConfig) do |ops|
+                case ops
+                when :password
+                  baseMat
+                end
               end
+
+              @dec = CcipherFactory::SymKeyCipher.decryptor
+              @dec.output(@output)
+              @dec.key = sk
+              @dec.decrypt_init
+
+              @dec.decrypt_update_meta(st.cipherConfig)
+
+              @dec.decrypt_update_cipher(data) if not_empty?(data)
+
+              break
+
+            rescue KeyNotRegistered
+              # retry with next key
             end
-
-            @dec = CcipherFactory::SymKeyCipher.decryptor
-            @dec.output(@output)
-            @dec.key = sk
-            @dec.decrypt_init
-
-            @dec.decrypt_update_meta(st.cipherConfig)
-
-            @dec.decrypt_update_cipher(data) if not_empty?(data)
-
-            break
           end
 
         end
