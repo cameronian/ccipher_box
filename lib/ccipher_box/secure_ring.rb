@@ -8,7 +8,7 @@ module CcipherBox
 
   # 
   # SecureRing that carries a unique seed for data encryption and decryption
-  # Typically SecureRing contains one or more key vault for data protection
+  # Typically SecureRing contains one key vault for data protection
   #
   class SecureRing
     include TR::CondUtils
@@ -62,9 +62,17 @@ module CcipherBox
       @vault.keys.freeze
     end
 
-    def new_encryption_engine(name)
-      raise KeyNotRegistered, "Key with name '#{name}' not registered" if not is_key_registered?(name)
-      EncryptionEngine.new(@vault.get_key(name)) 
+    def get_key(name)
+      @vault.get_key(name)
+    end
+
+    def new_encryption_engine(*keyNames)
+      names = []
+      keyNames.each do |name|
+        raise KeyNotRegistered, "Key with name '#{name}' not registered" if not is_key_registered?(name)
+        names << @vault.get_key(name)
+      end
+      EncryptionEngine.new(*names)
     end
 
     def new_decryption_engine
