@@ -64,7 +64,7 @@ module CcipherBox
         keys << ring.get_key(keyName)
       end
 
-      puts "Encryption key : #{keys}"
+      #puts "Encryption key : #{keys}"
       EncryptionEngine.new(*keys)
     end
 

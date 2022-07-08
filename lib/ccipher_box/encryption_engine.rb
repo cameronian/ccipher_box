@@ -44,7 +44,7 @@ module CcipherBox
      
       encBaseMat = []
       @keys.each do |k|
-        logger.debug "Encrypt with key #{k.name}"
+        #logger.debug "Encrypt with key #{k.name}"
         encBaseMat << k.encrypt(@baseMat)
       end
       st.baseMaterial = encBaseMat
