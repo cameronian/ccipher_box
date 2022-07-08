@@ -44,6 +44,7 @@ module CcipherBox
      
       encBaseMat = []
       @keys.each do |k|
+        logger.debug "Encrypt with key #{k.name}"
         encBaseMat << k.encrypt(@baseMat)
       end
       st.baseMaterial = encBaseMat
@@ -62,6 +63,14 @@ module CcipherBox
       @intOut.delete
 
       aheader
+    end
+
+    def logger
+      if @logger.nil?
+        @logger = TeLogger::Tlogger.new
+        @logger.tag = :enc_eng
+      end
+      @logger
     end
 
   end

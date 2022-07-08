@@ -38,6 +38,16 @@ module CcipherBox
       @rings.freeze
     end
 
+    def init_ring(spec, opts = {  })
+     
+      ss = split_encryption_spec(spec)
+
+      ring = find_ring(ss[0], opts)
+      ring.generate_key(ss[1], opts) if not ring.is_key_registered?(ss[1])
+      ring
+
+    end
+
     # Implicit SecureRing management
     #
     # Encryption in chunk
@@ -54,6 +64,7 @@ module CcipherBox
         keys << ring.get_key(keyName)
       end
 
+      puts "Encryption key : #{keys}"
       EncryptionEngine.new(*keys)
     end
 
@@ -248,9 +259,11 @@ module CcipherBox
         autoCreate = opts[:auto_create_ring]
         autoCreate = true if is_empty?(autoCreate)
         if autoCreate
+          logger.debug "auto_create_ring is true. Creating ring '#{ringName}'."
           ring = SecureRing.new({ name: ringName })
           @rings[ringName] = ring
         else
+          logger.debug "auto_create_ring is false"
           raise SecureRingNotExist, "Ring '#{ringName}' does not exist and auto create is not active."
         end
       end
@@ -263,6 +276,14 @@ module CcipherBox
       ss = spec.split("/")
       raise SecureBoxEncryptionSpecError, "Spec requires to in format ring_name/key_name format" if ss.length != 2
       ss
+    end
+
+    def logger
+      if @logger.nil?
+        @logger = TeLogger::Tlogger.new
+        @logger.tag = :secbox
+      end
+      @logger
     end
 
   end

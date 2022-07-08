@@ -118,4 +118,76 @@ RSpec.describe CcipherBox::SecureBox do
 
   end
 
+  it 'generates securebox with multiple rings' do
+    
+    data = SecureRandom.random_bytes(2000)
+
+    extRing = CcipherBox::SecureRing.new({ name: "External" })
+    extRing.generate_key("backup", { algo: :aes, keysize: 256 })
+
+    subject.add_ring(extRing)
+
+    ext2 = CcipherBox::SecureRing.new({ name: "Dinner" })
+    ext2.generate_key("Hush", { algo: :aes, keysize: 256 })
+    subject.add_ring(ext2)
+
+    enc = subject.init_ring("FirstRing/opsKey1", { algo: :aes, keysize: 256 })
+    enc = subject.init_ring("FirstRing/opsKey2", { algo: :aes, keysize: 256 })
+
+    enc = subject.encryption_session("FirstRing/opsKey2", "External/backup", {}) # { auto_create_ring: false })
+    out = MemBuf.new
+    enc.init(out)
+    enc.update(data)
+    enc.final
+
+    # 
+    # Persist the SecureBox
+    #
+    sbout = subject.to_storage do |ops|
+      case ops
+      when :password
+        "p@ssw0rd"
+      end
+    end
+
+    # 
+    # load from storage
+    #
+    rsb = subject.class.load_storage(sbout) do |ops|
+      case ops
+      when :password
+        "p@ssw0rd"
+      end
+    end
+
+    dout = rsb.decrypt(out.bytes)
+    expect(@comp.is_equals?(dout, data)).to be true
+
+    dec = rsb.decryption_session("FirstRing")
+    dout2 = MemBuf.new
+    dec.init(dout2)
+    dec.update(out.bytes)
+    dec.final
+    expect(@comp.is_equals?(dout2.bytes, data)).to be true
+
+    dec2 = rsb.decryption_session("External")
+    dout3 = MemBuf.new
+    dec2.init(dout3)
+    dec2.update(out.bytes)
+    dec2.final
+    expect(@comp.is_equals?(dout3.bytes, data)).to be true
+
+    expect {
+
+      dec2 = rsb.decryption_session("Dinner")
+      dout3 = MemBuf.new
+      dec2.init(dout3)
+      dec2.update(out.bytes)
+      dec2.final
+
+    }.to raise_exception(CcipherBox::KeyNotRegistered)
+
+  end
+
+
 end
