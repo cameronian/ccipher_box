@@ -65,9 +65,20 @@ RSpec.describe CcipherBox::SecureBox do
     
     data = SecureRandom.random_bytes(2000)
 
-    enc = subject.encryption_session("FirstRing/opsKey1", { algo: :aes, keysize: 256 })
+    enc = subject.encryption_session("FirstRing/opsKey1") do |ops|
+      case ops
+      when :options
+        { algo: :aes, keysize: 256 }
+      end
+    end
 
-    enc = subject.encryption_session("FirstRing/opsKey2", { algo: :aes, keysize: 256 })
+    enc = subject.encryption_session("FirstRing/opsKey2") do |ops|
+      case ops
+      when :options
+        { algo: :aes, keysize: 256 }
+      end
+    end
+
     out = MemBuf.new
     enc.init(out)
     enc.update(data)
@@ -134,11 +145,16 @@ RSpec.describe CcipherBox::SecureBox do
     enc = subject.init_ring("FirstRing/opsKey1", { algo: :aes, keysize: 256 })
     enc = subject.init_ring("FirstRing/opsKey2", { algo: :aes, keysize: 256 })
 
-    enc = subject.encryption_session("FirstRing/opsKey2", "External/backup", {}) # { auto_create_ring: false })
+    enc = subject.encryption_session("FirstRing/opsKey2", "External/backup") # { auto_create_ring: false })
     out = MemBuf.new
     enc.init(out)
     enc.update(data)
     enc.final
+
+    enc2Dat = "Howday! How's your day?"
+    enc2 = subject.encrypt(enc2Dat, "FirstRing/opsKey1")
+    expect(enc2.nil?).to be false
+    expect(enc2.length > 0).to be true
 
     # 
     # Persist the SecureBox
@@ -162,6 +178,10 @@ RSpec.describe CcipherBox::SecureBox do
 
     dout = rsb.decrypt(out.bytes)
     expect(@comp.is_equals?(dout, data)).to be true
+
+    sout = rsb.decrypt(enc2)
+    expect(@comp.is_equals?(sout, enc2Dat)).to be true
+    
 
     dec = rsb.decryption_session("FirstRing")
     dout2 = MemBuf.new

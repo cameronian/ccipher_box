@@ -179,6 +179,10 @@ module CcipherBox
     #  st.encoded
     #end
 
+    def plain_key
+      mem_unseal(@key)
+    end
+
     private
     # Encrypt the actual key resides in memory
     def mem_seal(key)

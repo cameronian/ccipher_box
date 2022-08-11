@@ -33,6 +33,12 @@ Gem::Specification.new do |spec|
   spec.add_dependency "toolrack"
   spec.add_dependency "teLogger"
 
+  spec.add_dependency 'ccrypto'
+  spec.add_dependency 'binenc'
+  spec.add_dependency 'ccipher_factory'
+
+  spec.add_development_dependency 'devops_assist'
+
   # Uncomment to register a new dependency of your gem
   # spec.add_dependency "example-gem", "~> 1.0"
 

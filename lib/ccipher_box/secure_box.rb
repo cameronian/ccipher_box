@@ -52,7 +52,10 @@ module CcipherBox
     #
     # Encryption in chunk
     #
-    def encryption_session(*specs, opts)
+    def encryption_session(*specs, &block)
+
+      opts = block.call(:options) if block
+      opts = {  } if opts.nil?
 
       keys = []
       specs.each do |spec|
@@ -79,7 +82,10 @@ module CcipherBox
     # 
     # Single line encryption
     #
-    def encrypt(*specs, data)
+    def encrypt(data, *specs, &block)
+
+      opts = block.call(:options) if block
+      opts = {  } if opts.nil?
 
       keys = []
       specs.each do |spec|
@@ -87,11 +93,14 @@ module CcipherBox
         ringName = ss[0]
         keyName = ss[1]
         ring = find_ring(ringName, opts) 
-        ring.generate_key(keyName, opts) if not ring.is_key_registered?(keyName)
+        if not ring.is_key_registered?(keyName)
+          ring.generate_key(keyName, opts)
+          block.call(:new_key_generated) if block
+        end
         keys << ring.get_key(keyName)
       end
 
-      eng = ring.new_encryption_engine(*keys)
+      eng = EncryptionEngine.new(*keys)
       intBuf = MemBuf.new
       eng.init(intBuf)
       eng.update(data)

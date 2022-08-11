@@ -10,6 +10,10 @@ module CcipherBox
   # SecureRing that carries a unique seed for data encryption and decryption
   # Typically SecureRing contains one key vault for data protection
   #
+  # Different between SecureRing and MemVault is the encrypt/decrypt
+  # function of MemVault only for limited data however for SecureRing
+  # the data size is limited only by the algorithm limitation
+  #
   class SecureRing
     include TR::CondUtils
 
