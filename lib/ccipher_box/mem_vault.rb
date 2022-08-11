@@ -15,13 +15,13 @@ module CcipherBox
 
     class MemVaultException < Exception; end
 
-    def initialize(ring)
-      @ring = ring
+    def initialize(ringName)
+      @ringName = ringName
     end
 
     def register(name, key)
       @dataConv = Ccrypto::UtilFactory.instance(:data_conversion)
-      vault[name] = MemKey.new(@ring, key, name)
+      vault[name] = MemKey.new(@ringName, key, name)
       self
     end
 
